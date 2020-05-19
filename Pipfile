@@ -1,0 +1,25 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+pre-commit = "*"
+black = "*"
+
+[packages]
+celery = {extras = ["gevent", "librabbitmq", "redis"],version = "*"}
+praw = "*"
+gevent = "*"
+flower = "*"
+dnspython = "*"
+pyyaml = "*"
+sqlalchemy = "*"
+alembic = "*"
+
+[requires]
+python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
