@@ -7,6 +7,7 @@ verify_ssl = true
 pylint = "*"
 pre-commit = "*"
 black = "*"
+ipython = "*"
 
 [packages]
 celery = {extras = ["gevent", "librabbitmq", "redis"],version = "*"}
@@ -17,6 +18,8 @@ dnspython = "*"
 pyyaml = "*"
 sqlalchemy = "*"
 alembic = "*"
+redis = "*"
+jinja2 = "*"
 
 [requires]
 python_version = "3.8"
