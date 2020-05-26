@@ -2,7 +2,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from . import constants as c
 
 env = Environment(
-    loader=PackageLoader("RUpdatesBot", "templates"),
+    loader=PackageLoader("InformsYouBot", "templates"),
     autoescape=select_autoescape(["html", "xml"]),
 )
 

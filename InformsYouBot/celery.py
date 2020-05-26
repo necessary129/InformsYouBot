@@ -13,11 +13,11 @@ class Task(celery.Task):
 
 
 app = celery.Celery(
-    "RUpdatesBot",
+    "InformsYouBot",
     broker="pyamqp://",
     # backend='rpc://',
-    task_cls="RUpdatesBot.celery:Task",
-    include=["RUpdatesBot.tasks"],
+    task_cls="InformsYouBot.celery:Task",
+    include=["InformsYouBot.tasks"],
 )
 
 app.conf.update(task_serializer="pickle", accept_content=["pickle"])

@@ -22,8 +22,8 @@ fileConfig(config.config_file_name)
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from RUpdatesBot.utils import CONFIG
-from RUpdatesBot.database import Base
+from InformsYouBot.utils import CONFIG
+from InformsYouBot.database import Base
 
 config.set_main_option("sqlalchemy.url", str(CONFIG["db_url"]).replace("%", "%%"))
 
