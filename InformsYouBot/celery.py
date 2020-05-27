@@ -14,6 +14,34 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with InformsYouBot.  If not, see <http://www.gnu.org/licenses/>.
+def patch_http_connection_pool(**constructor_kwargs):
+    """
+    This allows to override the default parameters of the 
+    HTTPConnectionPool constructor.
+    For example, to increase the poolsize to fix problems 
+    with "HttpConnectionPool is full, discarding connection"
+    call this function with maxsize=16 (or whatever size 
+    you want to give to the connection pool)
+    """
+    from urllib3 import connectionpool, poolmanager
+
+    class MyHTTPConnectionPool(connectionpool.HTTPConnectionPool):
+        def __init__(self, *args, **kwargs):
+            kwargs.update(constructor_kwargs)
+            super(MyHTTPConnectionPool, self).__init__(*args, **kwargs)
+
+    poolmanager.pool_classes_by_scheme["http"] = MyHTTPConnectionPool
+
+    class MyHTTPSConnectionPool(connectionpool.HTTPSConnectionPool):
+        def __init__(self, *args, **kwargs):
+            kwargs.update(constructor_kwargs)
+            super(MyHTTPSConnectionPool, self).__init__(*args, **kwargs)
+
+    poolmanager.pool_classes_by_scheme["https"] = MyHTTPSConnectionPool
+
+
+patch_http_connection_pool(maxsize=500)
+
 import celery
 from .database import session
 
