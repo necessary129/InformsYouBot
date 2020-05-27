@@ -50,7 +50,8 @@ def get_new_messages():
             messages.append(item)
         else:
             non_messages.append(item)
-    group(process_message.s(m) for m in messages).delay()
+    for msg in messages:
+        process_message.s(msg).apply_async()
     reddit.inbox.mark_read(non_messages)
     reddit.inbox.mark_read(messages)
 
@@ -80,7 +81,8 @@ def get_new_submissions():
     sid.value = new_sid
     db.session.add(sid)
     db.session.commit()
-    group(process_submission.s(sub) for sub in new_subs).delay()
+    for sub in new_subs:
+        process_submission.s(sub).apply_async()
 
 
 @app.task
@@ -106,9 +108,8 @@ def process_submission(submission):
             ),
         )
     )
-    group(
-        inform_subscriber.s(subscriber, submission) for subscriber in subscribers
-    ).delay()
+    for subscriber in subscribers:
+        inform_subscriber.s(subscriber, submission).apply_async()
 
 
 @app.task
