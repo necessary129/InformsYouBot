@@ -19,10 +19,11 @@ from celery import group
 from praw.models import Message
 from sqlalchemy.orm import contains_eager
 
-from .utils import get_main_instance, get_an_instance, only_one
+from .utils import get_main_instance, get_an_instance, only_one, message_url, CONFIG
 from .reddit import get_submissions_newer_than
 from . import database as db
 from . import constants as c
+from .template import get_template
 
 
 from .commands import check_command
@@ -90,7 +91,20 @@ def process_submission(submission):
         s.subscriber.username for s in db.get_subscriptions(author, subreddit)
     ]
     submission.reply(
-        c.NEW_SUBMISSION_MESSAGE.format(c=c, author=author, subreddit=subreddit)
+        get_template("postcomment.j2").render(
+            author=author,
+            subreddit=subreddit,
+            extra=(
+                (
+                    "Unsubscribe",
+                    message_url(
+                        c.USERNAME,
+                        "Unsubscribe",
+                        f"!unsubscribe /u/{author} /r/{subreddit}",
+                    ),
+                ),
+            ),
+        )
     )
     group(
         inform_subscriber.s(subscriber, submission) for subscriber in subscribers
@@ -105,7 +119,19 @@ def inform_subscriber(subscriber, submission):
     reddit = get_an_instance()
     reddit.redditor(subscriber).message(
         subject="Information",
-        message=c.UPDATE_MESSAGE.format(
-            c=c, author=author, subreddit=subreddit, url=url
+        message=get_template("base.j2").render(
+            message=c.UPDATE_MESSAGE.format(
+                author=author, subreddit=subreddit, url=url
+            ),
+            extra=(
+                (
+                    "Unsubscribe",
+                    message_url(
+                        c.USERNAME,
+                        "Unsubscribe",
+                        f"!unsubscribe /u/{author} /r/{subreddit}",
+                    ),
+                ),
+            ),
         ),
     )

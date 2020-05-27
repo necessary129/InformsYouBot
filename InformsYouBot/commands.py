@@ -31,7 +31,7 @@ _SUB_EXISTS_MSG = r"""You are already subscribed to /u/{author} on /r/{subreddit
 """
 _SUB_NOT_EXISTS_MSG = r"""You are not already subscribed to /u/{author} on /r/{subreddit}
 """
-_SUB_REMOVED_MSG = r"""You are now subscribed to /u/{author} on /r/{subreddit}
+_SUB_REMOVED_MSG = r"""You are now unsubscribed to /u/{author} on /r/{subreddit}
 """
 
 

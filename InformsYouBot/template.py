@@ -21,7 +21,8 @@ env = Environment(
     loader=PackageLoader("InformsYouBot", "templates"),
     autoescape=select_autoescape(["html", "xml"]),
 )
+env.globals.update({"c": c, "u": u})
 
 
 def get_template(template):
-    return env.get_template(template, globals={"c": c, "u": u})
+    return env.get_template(template)

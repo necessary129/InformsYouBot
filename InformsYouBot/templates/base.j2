@@ -7,11 +7,11 @@
 {% set li=extra+c.TABLES %}
 {% else %}
 {% set li=c.TABLES %}
-{% endif %}}
+{% endif %}
 {% for txt, url in li -%}
-{{ pipe() }}[{{ txt }}]({{ url }})
+{{ pipe() }}[^({{ txt }})]({{ url }})
 {%- endfor %}
-|{% for txt, url in li -%}
+|{% for _ in li -%}
 -|
 {%- endfor %}
 {% endblock %}
