@@ -18,6 +18,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import IntegrityError
+
 
 from ..utils import CONFIG
 
@@ -25,6 +27,17 @@ engine = create_engine(CONFIG["db_url"])
 session = scoped_session(sessionmaker(bind=engine))
 
 from .models import *
+
+
+def create_or_get(model, **kwargs):
+    try:
+        saved = model(**kwargs)
+        session.add(saved)
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        saved = session.query(model).filter_by(**kwargs).first()
+    return saved
 
 
 def get_subscriptions(author, subreddit):
