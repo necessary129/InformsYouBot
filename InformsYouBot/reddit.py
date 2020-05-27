@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with InformsYouBot.  If not, see <http://www.gnu.org/licenses/>.
 from .utils import get_an_instance, get_main_instance
-from prawcore import NotFound
+from prawcore.exceptions import ResponseException
 
 
 def get_submissions_newer_than(subreddits, sid=None):
@@ -38,7 +38,7 @@ def user_exists(user):
     try:
         reddit.redditor(user).id
         return True
-    except NotFound:
+    except ResponseException:
         return False
 
 
@@ -47,5 +47,5 @@ def subreddit_exists(subreddit):
     try:
         reddit.subreddit(subreddit).id
         return True
-    except NotFound:
+    except ResponseException:
         return False
