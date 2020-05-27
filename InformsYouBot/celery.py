@@ -48,8 +48,9 @@ from .database import session
 
 class Task(celery.Task):
     retry_backoff = True
-    retry_backoff_max = 360
+    retry_backoff_max = 700
     retry_jitter = True
+    #    max_retries = 50
     autoretry_for = (Exception,)
 
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
