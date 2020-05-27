@@ -16,7 +16,9 @@
 #    along with InformsYouBot.  If not, see <http://www.gnu.org/licenses/>.
 from .celery import app
 from celery import group
+from celery.exceptions import Ignore
 from praw.models import Message
+from praw.exceptions import RedditAPIException
 from sqlalchemy.orm import contains_eager
 
 from .utils import get_main_instance, get_an_instance, only_one, message_url, CONFIG
@@ -92,22 +94,28 @@ def process_submission(submission):
     subscribers = [
         s.subscriber.username for s in db.get_subscriptions(author, subreddit)
     ]
-    submission.reply(
-        get_template("postcomment.j2").render(
-            author=author,
-            subreddit=subreddit,
-            extra=(
-                (
-                    "Unsubscribe",
-                    message_url(
-                        c.USERNAME,
+    try:
+        submission.reply(
+            get_template("postcomment.j2").render(
+                author=author,
+                subreddit=subreddit,
+                extra=(
+                    (
                         "Unsubscribe",
-                        f"!unsubscribe /u/{author} /r/{subreddit}",
+                        message_url(
+                            c.USERNAME,
+                            "Unsubscribe",
+                            f"!unsubscribe /u/{author} /r/{subreddit}",
+                        ),
                     ),
                 ),
-            ),
+            )
         )
-    )
+    except RedditAPIException as e:
+        for error in e.items:
+            if error.error_type == "THREAD_LOCKED":
+                raise Ignore()
+        raise e
     for subscriber in subscribers:
         inform_subscriber.s(subscriber, submission).apply_async()
 
