@@ -1,0 +1,4 @@
+{% extends "base.j2" %}
+{% block content %}
+Click [here]({{ u.message_url(c.USERNAME, "Subscribe", "!subscribe /u/{author} /r/{subreddit}".format(author=author,subreddit=subreddit)) }}) to get a new notification everytime /u/{{ author }} posts on /r/{{ subreddit }}
+{% endblock %}

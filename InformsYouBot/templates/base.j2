@@ -1,0 +1,17 @@
+{% block content %}
+{{ message }}
+{% endblock %}
+{% block tables %}
+{% set pipe = joiner("|")%}
+{% if extra %}
+{% set li=extra+c.TABLES %}
+{% else %}
+{% set li=c.TABLES %}
+{% endif %}}
+{% for txt, url in li -%}
+{{ pipe() }}[{{ txt }}]({{ url }})
+{%- endfor %}
+|{% for txt, url in li -%}
+-|
+{%- endfor %}
+{% endblock %}

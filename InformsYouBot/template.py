@@ -15,7 +15,7 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with InformsYouBot.  If not, see <http://www.gnu.org/licenses/>.
 from jinja2 import Environment, PackageLoader, select_autoescape
-from . import constants as c
+from . import constants as c, utils as u
 
 env = Environment(
     loader=PackageLoader("InformsYouBot", "templates"),
@@ -24,4 +24,4 @@ env = Environment(
 
 
 def get_template(template):
-    return env.get_template(template, globals=(c,))
+    return env.get_template(template, globals={"c": c, "u": u})

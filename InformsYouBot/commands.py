@@ -19,6 +19,8 @@ from . import database as db
 from .reddit import user_exists, subreddit_exists
 from sqlalchemy.exc import IntegrityError
 from . import constants as c
+from .template import get_template
+from .utils import message_url
 
 _COMMANDS = {}
 _INV_MSG = r"""Invalid arguments specified for {cmd}.
@@ -49,7 +51,11 @@ def check_command(message):
         return
     func, rargs = _COMMANDS[command]
     if len(args) != len(rargs):
-        message.reply(_INV_MSG.format(cmd=command, args=", ".join(rargs)))
+        message.reply(
+            get_template("base.j2").render(
+                message=_INV_MSG.format(cmd=command, args=", ".join(rargs))
+            )
+        )
         return
     func(message, *args)
 
@@ -63,7 +69,11 @@ def unsubscribe(message, auth, sub):
     subscriber_s = message.author.name.lower()
     subscription = db.get_subscription(subscriber_s, author_s, subreddit_s)
     if not subscription:
-        message.reply(_SUB_NOT_EXISTS_MSG.format(author=auth_s, subreddit=sub_s))
+        message.reply(
+            get_template("base.j2").render(
+                message=_SUB_NOT_EXISTS_MSG.format(author=auth_s, subreddit=sub_s)
+            )
+        )
         return
     try:
         db.session.delete(subscription)
@@ -71,7 +81,11 @@ def unsubscribe(message, auth, sub):
     except:
         db.session.rollback()
         raise
-    message.reply(_SUB_REMOVED_MSG.format(author=auth_s, subreddit=sub_s))
+    message.reply(
+        get_template("base.j2").render(
+            message=_SUB_REMOVED_MSG.format(author=auth_s, subreddit=sub_s)
+        )
+    )
 
 
 @command("subscribe", "Author", "Subreddit")
@@ -92,7 +106,11 @@ def subscribe(message, auth, sub):
                 db.session.rollback()
                 author = db.session.query(db.User).filter_by(username=author_s).first()
         else:
-            message.reply(f"The user /u/{author_s} doesn't exist")
+            message.reply(
+                get_template("base.j2").render(
+                    message=f"The user /u/{author_s} doesn't exist"
+                )
+            )
             return
     subreddit = db.session.query(db.Subreddit).filter_by(name=subreddit_s).first()
     if not subreddit:
@@ -107,7 +125,11 @@ def subscribe(message, auth, sub):
                     db.session.query(db.Subreddit).filter_by(name=subreddit_s).first()
                 )
         else:
-            message.reply(f"The subreddit /r/{subreddit_s} doesn't exist")
+            message.reply(
+                get_template("base.j2").render(
+                    message=f"The subreddit /r/{subreddit_s} doesn't exist"
+                )
+            )
             return
     subscriber = db.session.query(db.User).filter_by(username=subscriber_s).first()
     if not subscriber:
@@ -129,6 +151,14 @@ def subscribe(message, auth, sub):
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        message.reply(_SUB_EXISTS_MSG.format(author=auth_s, subreddit=sub_s))
+        message.reply(
+            get_template("base.j2").render(
+                message=_SUB_EXISTS_MSG.format(author=auth_s, subreddit=sub_s)
+            )
+        )
         return
-    message.reply(c.SUBSCRIPTION_SUCCESS.format(author=auth_s, subreddit=sub_s))
+    message.reply(
+        get_template("base.j2").render(
+            message=c.SUBSCRIPTION_SUCCESS.format(author=auth_s, subreddit=sub_s)
+        )
+    )

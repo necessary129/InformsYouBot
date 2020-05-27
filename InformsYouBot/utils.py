@@ -19,6 +19,7 @@ import random
 from itertools import cycle
 from functools import wraps
 import redis
+from urllib.parse import quote
 
 REDIS_CLIENT = redis.Redis()
 
@@ -98,6 +99,19 @@ def get_main_instance():
 def get_an_instance():
     global INSTANCE_CYCLE
     return next(INSTANCE_CYCLE)
+
+
+def message_url(recipient, subject, message):
+    return "".join(
+        (
+            "/message/compose/?to=",
+            quote(recipient),
+            "&subject=",
+            quote(subject),
+            "&message=",
+            quote(message),
+        )
+    )
 
 
 _load_config()
