@@ -38,6 +38,9 @@ SUBSCRIPTION_SUCCESS = (
 
 
 TABLES = (
-    ("My updates", message_url(USERNAME, "Updates", "!myupdates")),
-    ("Message owner", message_url(OWNER_USERNAME, f"Message about /u/{USERNAME}", "")),
+    ("My subscriptions", message_url(USERNAME, "Updates", "!mysubscriptions")),
+    (
+        "Message maintainer",
+        message_url(OWNER_USERNAME, f"Message about /u/{USERNAME}", ""),
+    ),
 )
