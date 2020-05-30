@@ -93,7 +93,7 @@ def process_submission(submission):
     author = submission.author.name
     subreddit = (
         db.session.query(db.Subreddit)
-        .filter_by(name=submission.subreddit.display_name)
+        .filter_by(name=submission.subreddit.display_name.lower())
         .first()
     )
     subscribers = [
@@ -111,7 +111,7 @@ def process_submission(submission):
                             message_url(
                                 c.USERNAME,
                                 "Unsubscribe",
-                                f"!unsubscribe /u/{author} /r/{subreddit}",
+                                f"!unsubscribe /u/{author} /r/{subreddit.name}",
                             ),
                         ),
                     ),
