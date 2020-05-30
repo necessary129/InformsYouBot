@@ -62,3 +62,13 @@ def get_subscription(subscriber, author, subreddit):
         .filter(User.username == author.lower())
         .first()
     )
+
+
+def get_or_create_if(model, iff, **kwargs):
+    saved = session.query(model).filter_by(**kwargs).first()
+    if saved:
+        return saved
+    if iff():
+        return create_or_get(model, **kwargs)
+    else:
+        return False

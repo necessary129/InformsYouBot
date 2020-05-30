@@ -142,54 +142,27 @@ def subscribe(message, auth, sub):
     sub_s = sub.split("/")[-1]
     subreddit_s = sub_s.lower()
     subscriber_s = message.author.name.lower()
-    author = db.session.query(db.User).filter_by(username=author_s).first()
+    author = db.get_or_create_if(
+        db.User, lambda: user_exists(author_s), username=author_s
+    )
     if not author:
-        if user_exists(author_s):
-            author = db.User(username=author_s)
-            try:
-                db.session.add(author)
-                db.session.commit()
-            except IntegrityError:
-                db.session.rollback()
-                author = db.session.query(db.User).filter_by(username=author_s).first()
-        else:
-            message.reply(
-                get_template("base.j2").render(
-                    message=f"The user /u/{author_s} doesn't exist"
-                )
+        message.reply(
+            get_template("base.j2").render(
+                message=f"The user /u/{author_s} doesn't exist"
             )
-            return
-    subreddit = db.session.query(db.Subreddit).filter_by(name=subreddit_s).first()
+        )
+        return
+    subreddit = db.get_or_create_if(
+        db.Subreddit, lambda: subreddit_exists(subreddit_s), name=subreddit_s
+    )
     if not subreddit:
-        if subreddit_exists(subreddit_s):
-            subreddit = db.Subreddit(name=subreddit_s)
-            try:
-                db.session.add(subreddit)
-                db.session.commit()
-            except IntegrityError:
-                db.session.rollback()
-                subreddit = (
-                    db.session.query(db.Subreddit).filter_by(name=subreddit_s).first()
-                )
-        else:
-            message.reply(
-                get_template("base.j2").render(
-                    message=f"The subreddit /r/{subreddit_s} doesn't exist"
-                )
+        message.reply(
+            get_template("base.j2").render(
+                message=f"The subreddit /r/{subreddit_s} doesn't exist"
             )
-            return
-    subscriber = db.session.query(db.User).filter_by(username=subscriber_s).first()
-    if not subscriber:
-        subscriber = db.User(username=subscriber_s)
-        db.session.add(subscriber)
-        try:
-            db.session.add(subscriber)
-            db.session.commit()
-        except IntegrityError:
-            db.session.rollback()
-            subscriber = (
-                db.session.query(db.User).filter_by(username=subscriber_s).first()
-            )
+        )
+        return
+    subscriber = db.create_or_get(db.User, username=subscriber_s)
     subscription = db.Subscription(
         author=author, subreddit=subreddit, subscriber=subscriber
     )
