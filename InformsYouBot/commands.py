@@ -22,6 +22,8 @@ from . import constants as c
 from .template import get_template
 from .utils import message_url
 
+from sqlalchemy.orm import joinedload
+
 _COMMANDS = {}
 _INV_MSG = r"""Invalid arguments specified for {cmd}.
 
@@ -86,6 +88,21 @@ def unsubscribe(message, auth, sub):
             message=_SUB_REMOVED_MSG.format(author=auth_s, subreddit=sub_s)
         )
     )
+
+
+@command("mysubscriptions")
+def mysubscriptions(message):
+    subscriber = message.author.name.lower()
+    subscriptions = (
+        db.session.query(db.Subscription)
+        .join(db.Subscription.subscriber)
+        .filter(db.User.username == subscriber)
+        .options(
+            joinedload(db.Subscription.author), joinedload(db.Subscription.subreddit)
+        )
+        .all()
+    )
+    message.reply(get_template("subscriptions.j2").render(subscriptions=subscriptions))
 
 
 @command("subscribe", "Author", "Subreddit")

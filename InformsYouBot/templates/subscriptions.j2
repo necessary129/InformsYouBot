@@ -3,10 +3,10 @@
 {% if subscriptions  %}
 Author|Subreddit|Unsubscribe
 :-:|:-:|:-:
-{% for sub in subscriptions %}
-/u/{{ sub.author.username }}|/r/{{ sub.subreddit.name }}|[Unsubscribe]({{ u.message_url(c.USERNAME, "Unsubscribe", "!unsubscribe {author} {subreddit}".format(author=sub.author.name, subreddit=sub.subreddit.name)) }})
-{% endfor %}}
+{%- for sub in subscriptions %}
+/u/{{ sub.author.username }}|/r/{{ sub.subreddit.name }}|[Unsubscribe]({{ u.message_url(c.USERNAME, "Unsubscribe", "!unsubscribe /u/{author} /r/{subreddit}".format(author=sub.author.username, subreddit=sub.subreddit.name)) }})
+{% endfor %}
 {% else %}
 You don't have any current subscriptions.
-{% endif %}}
+{% endif %}
 {% endblock %}
