@@ -22,7 +22,7 @@ NEW_SUBMISSION_MESSAGE = r"""Click [here](/message/compose/?to={c.USERNAME}&subj
 """
 
 USERNAME = CONFIG["reddit_accounts"][0]["username"]
-OWNER_USERNAME = CONFIG["owner_account"]
+OWNER_USERNAME = CONFIG["owner_account"].lower()
 
 UPDATE_MESSAGE = r"""/u/{author} has posted a submission to /r/{subreddit}.
 

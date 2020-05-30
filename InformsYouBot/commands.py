@@ -37,9 +37,9 @@ _SUB_REMOVED_MSG = r"""You are now unsubscribed to /u/{author} on /r/{subreddit}
 """
 
 
-def command(command, *fargs):
+def command(command, *fargs, owner_only=False):
     def wrapper(func):
-        _COMMANDS[command] = (func, fargs)
+        _COMMANDS[command] = (func, fargs, owner_only)
         return func
 
     return wrapper
@@ -51,7 +51,11 @@ def check_command(message):
     command = args.pop(0).lower()[1:]
     if command not in _COMMANDS.keys():
         return
-    func, rargs = _COMMANDS[command]
+    func, rargs, owner_only = _COMMANDS[command]
+    if owner_only:
+        user = message.author.name.lower()
+        if not user == c.OWNER_USERNAME:
+            return
     if len(args) != len(rargs):
         message.reply(
             get_template("base.j2").render(
