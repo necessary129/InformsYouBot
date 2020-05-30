@@ -16,7 +16,8 @@
 #    along with InformsYouBot.  If not, see <http://www.gnu.org/licenses/>.
 from .celery import app
 from celery import group
-from celery.exceptions import Ignore
+
+# from celery.exceptions import Ignore
 from praw.models import Message
 from praw.exceptions import RedditAPIException
 from sqlalchemy.orm import contains_eager
@@ -114,8 +115,9 @@ def process_submission(submission):
     except RedditAPIException as e:
         for error in e.items:
             if error.error_type == "THREAD_LOCKED":
-                raise Ignore()
-        raise e
+                break
+        else:
+            raise e
     for subscriber in subscribers:
         inform_subscriber.s(subscriber, submission).apply_async()
 
