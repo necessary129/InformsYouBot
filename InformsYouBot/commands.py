@@ -66,6 +66,32 @@ def check_command(message):
     func(message, *args)
 
 
+@command("post", "Subreddit", owner_only=True)
+def post(message, sub):
+    sub_s = sub.split("/")[-1].lower()
+    subreddit = db.session.query(db.Subreddit).filter_by(name=sub_s).first()
+    if not subreddit:
+        message.reply(f"The subreddit /r/{sub_s} is not in my database.")
+        return
+    subreddit.post = True
+    db.session.add(subreddit)
+    db.session.commit()
+    message.reply(f"I will now comment on posts in /r/{sub_s}")
+
+
+@command("nopost", "Subreddit", owner_only=True)
+def nopost(message, sub):
+    sub_s = sub.split("/")[-1].lower()
+    subreddit = db.session.query(db.Subreddit).filter_by(name=sub_s).first()
+    if not subreddit:
+        message.reply(f"The subreddit /r/{sub_s} is not in my database.")
+        return
+    subreddit.post = False
+    db.session.add(subreddit)
+    db.session.commit()
+    message.reply(f"I will not comment on posts in /r/{sub_s} from now on.")
+
+
 @command("unsubscribe", "Author", "Subreddit")
 def unsubscribe(message, auth, sub):
     auth_s = auth.split("/")[-1]
