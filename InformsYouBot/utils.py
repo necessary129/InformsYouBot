@@ -104,7 +104,7 @@ def get_an_instance():
 def message_url(recipient, subject, message):
     return "".join(
         (
-            "/message/compose/?to=",
+            "https://np.reddit.com/message/compose/?to=",
             quote(recipient),
             "&subject=",
             quote(subject),
