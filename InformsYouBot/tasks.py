@@ -91,27 +91,32 @@ def get_new_submissions():
 @app.task
 def process_submission(submission):
     author = submission.author.name
-    subreddit = submission.subreddit.display_name
+    subreddit = (
+        db.session.query(db.Subreddit)
+        .filter_by(name=submission.subreddit.display_name)
+        .first()
+    )
     subscribers = [
         s.subscriber.username for s in db.get_subscriptions(author, subreddit)
     ]
     try:
-        submission.reply(
-            get_template("postcomment.j2").render(
-                author=author,
-                subreddit=subreddit,
-                extra=(
-                    (
-                        "Unsubscribe",
-                        message_url(
-                            c.USERNAME,
+        if subreddit.post:
+            submission.reply(
+                get_template("postcomment.j2").render(
+                    author=author,
+                    subreddit=subreddit,
+                    extra=(
+                        (
                             "Unsubscribe",
-                            f"!unsubscribe /u/{author} /r/{subreddit}",
+                            message_url(
+                                c.USERNAME,
+                                "Unsubscribe",
+                                f"!unsubscribe /u/{author} /r/{subreddit}",
+                            ),
                         ),
                     ),
-                ),
+                )
             )
-        )
     except RedditAPIException as e:
         for error in e.items:
             if error.error_type == "THREAD_LOCKED":

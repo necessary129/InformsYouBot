@@ -46,7 +46,7 @@ def get_subscriptions(author, subreddit):
         .join(Subscription.author)
         .filter(User.username == author.lower())
         .join(Subscription.subreddit)
-        .filter(Subreddit.name == subreddit.lower())
+        .filter(Subscription.subreddit == subreddit)
         .all()
     )
 
