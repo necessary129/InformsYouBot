@@ -114,7 +114,7 @@ def process_submission(submission):
         )
         post_time = datetime.datetime.utcfromtimestamp(submission.created_utc)
         if subreddit.last_check:
-            if subreddit.last_check > post_time:
+            if (subreddit.last_check - post_time) > datetime.timedelta(minutes=2):
                 return
         subreddit.last_check = post_time
         db.session.add(subreddit)
