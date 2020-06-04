@@ -16,6 +16,7 @@
 #    along with InformsYouBot.  If not, see <http://www.gnu.org/licenses/>.
 from .utils import get_an_instance, get_main_instance
 from prawcore.exceptions import ResponseException
+import datetime
 
 
 def get_id_from_subs(subs):
@@ -27,7 +28,7 @@ def get_id_from_subs(subs):
             pass
 
 
-def get_submissions_newer_than(subreddits, sid=None):
+def get_submissions_newer_than(subreddits, sid, last_checked):
     reddit = get_main_instance()
     subreddits = "+".join(subreddits)
     submissions = []
@@ -37,6 +38,10 @@ def get_submissions_newer_than(subreddits, sid=None):
         return submissions
     for submission in generator:
         if submission.id == sid:
+            break
+        elif (
+            last_checked - datetime.datetime.utcfromtimestamp(submission.created_utc)
+        ) < datetime.timedelta(minutes=15):
             break
         submissions.append(submission)
     return submissions

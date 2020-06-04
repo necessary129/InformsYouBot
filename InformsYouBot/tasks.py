@@ -85,12 +85,6 @@ def get_new_submissions():
     if not sid:
         sid = db.KVStore(key="last_sid", value="")
     ld = datetime.datetime.utcnow().timestamp()
-    new_subs = get_submissions_newer_than(subreddits, sid.value)
-    if not new_subs:
-        return
-    new_sid = get_id_from_subs(new_subs)
-    if not new_sid:
-        return
     lc = db.session.query(db.KVStore).get("last_checked_t")
     if not lc:
         lc = db.KVStore(
@@ -103,15 +97,21 @@ def get_new_submissions():
                 )
             ),
         )
-    last_checked = datetime.datetime.fromtimestamp(float(lc.value))
+    last_checked = datetime.datetime.utcfromtimestamp(float(lc.value))
+    new_subs = get_submissions_newer_than(subreddits, sid.value, last_checked)
+    lc.value = str(ld)
+    db.session.add(lc)
+    db.session.commit()
+    if not new_subs:
+        return
+    new_sid = get_id_from_subs(new_subs)
+    if not new_sid:
+        return
     sid.value = new_sid
     db.session.add(sid)
     db.session.commit()
     for sub in new_subs:
         process_submission.s(sub, last_checked).apply_async()
-    lc.value = str(ld)
-    db.session.add(lc)
-    db.session.commit()
 
 
 @app.task
