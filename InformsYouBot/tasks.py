@@ -92,6 +92,9 @@ def get_new_submissions():
 
 @app.task
 def process_submission(submission):
+    a = submission.author
+    if not a:
+        return
     author = submission.author.name
     subreddit = (
         db.session.query(db.Subreddit)
