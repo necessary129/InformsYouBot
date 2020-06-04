@@ -43,7 +43,7 @@ def setup_periodic_tasks(sender, **kwargs):
 
 
 @app.task
-@only_one(timeout=60)
+@only_one
 def get_new_messages():
     reddit = get_main_instance()
     messages = []
@@ -69,7 +69,7 @@ def process_message(message):
 
 
 @app.task
-@only_one(timeout=60)
+@only_one
 def get_new_submissions():
     subreddits = [s[0] for s in db.session.query(db.Subreddit.name).all()]
     if not subreddits:
