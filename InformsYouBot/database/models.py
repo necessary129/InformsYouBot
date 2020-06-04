@@ -22,6 +22,7 @@ from sqlalchemy import (
     Boolean,
     ForeignKey,
     UniqueConstraint,
+    DateTime,
 )
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship
@@ -59,6 +60,7 @@ class Subreddit(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, unique=True)
     post = Column(Boolean, nullable=False, unique=False, default=False)
+    last_check = Column(DateTime, nullable=True, unique=False)
 
     def __repr__(self):
         return f"<Subreddit {self.name}>"

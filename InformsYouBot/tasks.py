@@ -21,6 +21,7 @@ from celery import group
 from praw.models import Message
 from praw.exceptions import RedditAPIException
 from sqlalchemy.orm import contains_eager
+import datetime
 
 from .utils import get_main_instance, get_an_instance, only_one, message_url, CONFIG
 from .reddit import get_submissions_newer_than, get_id_from_subs
@@ -103,6 +104,13 @@ def process_submission(submission):
         .filter_by(name=submission.subreddit.display_name.lower())
         .first()
     )
+    post_time = datetime.datetime.utcfromtimestamp(submission.created_utc)
+    if subreddit.last_check:
+        if subreddit.last_check > post_time:
+            return
+    subreddit.last_check = post_time
+    db.session.add(subreddit)
+    db.session.commit()
     subscribers = [
         s.subscriber.username for s in db.get_subscriptions(author, subreddit)
     ]
