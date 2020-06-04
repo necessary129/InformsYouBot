@@ -18,6 +18,15 @@ from .utils import get_an_instance, get_main_instance
 from prawcore.exceptions import ResponseException
 
 
+def get_id_from_subs(subs):
+    for sub in subs:
+        try:
+            if sub.id:
+                return sub.id
+        except:
+            pass
+
+
 def get_submissions_newer_than(subreddits, sid=None):
     reddit = get_main_instance()
     subreddits = "+".join(subreddits)

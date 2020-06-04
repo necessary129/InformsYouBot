@@ -23,7 +23,7 @@ from praw.exceptions import RedditAPIException
 from sqlalchemy.orm import contains_eager
 
 from .utils import get_main_instance, get_an_instance, only_one, message_url, CONFIG
-from .reddit import get_submissions_newer_than
+from .reddit import get_submissions_newer_than, get_id_from_subs
 from . import database as db
 from . import constants as c
 from .template import get_template
@@ -80,7 +80,9 @@ def get_new_submissions():
     new_subs = get_submissions_newer_than(subreddits, sid.value)
     if not new_subs:
         return
-    new_sid = new_subs[0].id
+    new_sid = get_id_from_subs(new_subs)
+    if not new_sid:
+        return
     sid.value = new_sid
     db.session.add(sid)
     db.session.commit()
