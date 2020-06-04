@@ -23,7 +23,14 @@ from praw.exceptions import RedditAPIException
 from sqlalchemy.orm import contains_eager
 import datetime
 
-from .utils import get_main_instance, get_an_instance, only_one, message_url, CONFIG
+from .utils import (
+    get_main_instance,
+    get_an_instance,
+    only_one,
+    message_url,
+    CONFIG,
+    REDIS_CLIENT,
+)
 from .reddit import get_submissions_newer_than, get_id_from_subs
 from . import database as db
 from . import constants as c
@@ -87,7 +94,7 @@ def get_new_submissions():
     sid.value = new_sid
     db.session.add(sid)
     db.session.commit()
-    for sub in new_subs:
+    for sub in reversed(new_subs):
         process_submission.s(sub).apply_async()
 
 
@@ -99,18 +106,19 @@ def process_submission(submission):
     except:
         return
     author = submission.author.name
-    subreddit = (
-        db.session.query(db.Subreddit)
-        .filter_by(name=submission.subreddit.display_name.lower())
-        .first()
-    )
-    post_time = datetime.datetime.utcfromtimestamp(submission.created_utc)
-    if subreddit.last_check:
-        if subreddit.last_check > post_time:
-            return
-    subreddit.last_check = post_time
-    db.session.add(subreddit)
-    db.session.commit()
+    with REDIS_CLIENT.lock(f"process_sub_{submission.subreddit.display_name}"):
+        subreddit = (
+            db.session.query(db.Subreddit)
+            .filter_by(name=submission.subreddit.display_name.lower())
+            .first()
+        )
+        post_time = datetime.datetime.utcfromtimestamp(submission.created_utc)
+        if subreddit.last_check:
+            if subreddit.last_check > post_time:
+                return
+        subreddit.last_check = post_time
+        db.session.add(subreddit)
+        db.session.commit()
     subscribers = [
         s.subscriber.username for s in db.get_subscriptions(author, subreddit)
     ]
