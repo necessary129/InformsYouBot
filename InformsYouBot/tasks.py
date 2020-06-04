@@ -84,7 +84,7 @@ def get_new_submissions():
     sid = db.session.query(db.KVStore).get("last_sid")
     if not sid:
         sid = db.KVStore(key="last_sid", value="")
-    ld = datetime.datetime.utcnow().timestamp()
+    ld = datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
     lc = db.session.query(db.KVStore).get("last_checked_t")
     if not lc:
         lc = db.KVStore(
@@ -92,12 +92,15 @@ def get_new_submissions():
             value=str(
                 (
                     (
-                        datetime.datetime.utcnow() - datetime.timedelta(days=9999)
+                        datetime.datetime.now(tz=datetime.timezone.utc)
+                        - datetime.timedelta(days=9999)
                     ).timestamp()
                 )
             ),
         )
-    last_checked = datetime.datetime.utcfromtimestamp(float(lc.value))
+    last_checked = datetime.datetime.fromtimestamp(
+        float(lc.value), tz=datetime.timezone.utc
+    )
     new_subs = get_submissions_newer_than(subreddits, sid.value, last_checked)
     lc.value = str(ld)
     db.session.add(lc)
@@ -127,12 +130,6 @@ def process_submission(submission, last_checked):
         .filter_by(name=submission.subreddit.display_name.lower())
         .first()
     )
-    post_time = datetime.datetime.utcfromtimestamp(submission.created_utc)
-    if post_time < last_checked:
-        return
-    subreddit.last_check = post_time
-    db.session.add(subreddit)
-    db.session.commit()
     subscribers = [
         s.subscriber.username for s in db.get_subscriptions(author, subreddit)
     ]

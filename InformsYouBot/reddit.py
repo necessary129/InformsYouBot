@@ -36,12 +36,11 @@ def get_submissions_newer_than(subreddits, sid, last_checked):
     if not sid:
         submissions.append(next(generator))
         return submissions
+    timestamp = last_checked.timestamp()
     for submission in generator:
         if submission.id == sid:
             break
-        elif (
-            last_checked - datetime.datetime.utcfromtimestamp(submission.created_utc)
-        ) < datetime.timedelta(minutes=15):
+        elif (timestamp - submission.created_utc) > 20:
             break
         submissions.append(submission)
     return submissions
