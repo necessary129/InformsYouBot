@@ -29,7 +29,6 @@ from .utils import (
     only_one,
     message_url,
     CONFIG,
-    REDIS_CLIENT,
 )
 from .reddit import get_submissions_newer_than, get_id_from_subs
 from . import database as db
@@ -85,40 +84,55 @@ def get_new_submissions():
     sid = db.session.query(db.KVStore).get("last_sid")
     if not sid:
         sid = db.KVStore(key="last_sid", value="")
+    ld = datetime.datetime.utcnow().timestamp()
     new_subs = get_submissions_newer_than(subreddits, sid.value)
     if not new_subs:
         return
     new_sid = get_id_from_subs(new_subs)
     if not new_sid:
         return
+    lc = db.session.query(db.KVStore).get("last_checked_t")
+    if not lc:
+        lc = db.KVStore(
+            key="last_checked_t",
+            value=str(
+                (
+                    (
+                        datetime.datetime.utcnow() - datetime.timedelta(days=9999)
+                    ).timestamp()
+                )
+            ),
+        )
+    last_checked = datetime.datetime.fromtimestamp(float(lc.value))
     sid.value = new_sid
     db.session.add(sid)
     db.session.commit()
-    for sub in reversed(new_subs):
-        process_submission.s(sub).apply_async()
+    for sub in new_subs:
+        process_submission.s(sub, last_checked).apply_async()
+    lc.value = str(ld)
+    db.session.add(lc)
+    db.session.commit()
 
 
 @app.task
-def process_submission(submission):
+def process_submission(submission, last_checked):
     try:
         if not (submission.author and submission.id):
             return
     except:
         return
     author = submission.author.name
-    with REDIS_CLIENT.lock(f"process_sub_{submission.subreddit.display_name}"):
-        subreddit = (
-            db.session.query(db.Subreddit)
-            .filter_by(name=submission.subreddit.display_name.lower())
-            .first()
-        )
-        post_time = datetime.datetime.utcfromtimestamp(submission.created_utc)
-        if subreddit.last_check:
-            if (subreddit.last_check - post_time) > datetime.timedelta(minutes=2):
-                return
-        subreddit.last_check = post_time
-        db.session.add(subreddit)
-        db.session.commit()
+    subreddit = (
+        db.session.query(db.Subreddit)
+        .filter_by(name=submission.subreddit.display_name.lower())
+        .first()
+    )
+    post_time = datetime.datetime.utcfromtimestamp(submission.created_utc)
+    if post_time < last_checked:
+        return
+    subreddit.last_check = post_time
+    db.session.add(subreddit)
+    db.session.commit()
     subscribers = [
         s.subscriber.username for s in db.get_subscriptions(author, subreddit)
     ]
