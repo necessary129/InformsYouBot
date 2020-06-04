@@ -92,7 +92,10 @@ def get_new_submissions():
 
 @app.task
 def process_submission(submission):
-    if not (submission.author and submission.id):
+    try:
+        if not (submission.author and submission.id):
+            return
+    except:
         return
     author = submission.author.name
     subreddit = (
