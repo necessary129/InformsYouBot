@@ -14,6 +14,8 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with InformsYouBot.  If not, see <http://www.gnu.org/licenses/>.
+
+
 def patch_http_connection_pool(**constructor_kwargs):
     """
     This allows to override the default parameters of the 

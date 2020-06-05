@@ -14,6 +14,15 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with InformsYouBot.  If not, see <http://www.gnu.org/licenses/>.
+import platform
+
+if platform.python_implementation() == "PyPy":
+    try:
+        from psycopg2cffi import compat
+
+        compat.register()
+    except ImportError:
+        pass
 import yaml
 import random
 from itertools import cycle
