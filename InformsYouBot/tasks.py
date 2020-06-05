@@ -68,6 +68,8 @@ def get_new_messages():
 
 @app.task
 def process_message(message):
+    if not message.author:
+        return
     body = message.body.strip().lower()
     if not body.startswith(c.TRIGGER):
         message.mark_read()
