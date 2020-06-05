@@ -42,10 +42,10 @@ from .commands import check_command
 @app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(
-        10, get_new_submissions.s(), name="Check for new submissions every 30s"
+        10, get_new_submissions.s(), name="Check for new submissions every 10s"
     )
     sender.add_periodic_task(
-        11, get_new_messages.s(), name="Check for new messages every 30s"
+        11, get_new_messages.s(), name="Check for new messages every 11s"
     )
 
 
