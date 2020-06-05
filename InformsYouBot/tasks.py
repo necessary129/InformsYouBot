@@ -114,11 +114,11 @@ def get_new_submissions():
     db.session.add(sid)
     db.session.commit()
     for sub in new_subs:
-        process_submission.s(sub, last_checked).apply_async()
+        process_submission.s(sub).apply_async()
 
 
 @app.task
-def process_submission(submission, last_checked):
+def process_submission(submission):
     try:
         if not (submission.author and submission.id):
             return
