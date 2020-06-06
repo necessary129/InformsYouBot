@@ -24,8 +24,8 @@ from sqlalchemy.orm import contains_eager
 import datetime
 
 from .utils import (
-    get_main_instance,
-    get_an_instance,
+    get_main_praw_instance,
+    get_a_praw_instance,
     only_one,
     message_url,
     CONFIG,
@@ -52,7 +52,7 @@ def setup_periodic_tasks(sender, **kwargs):
 @app.task
 @only_one
 def get_new_messages():
-    reddit = get_main_instance()
+    reddit = get_main_praw_instance()
     messages = []
     non_messages = []
     for item in reddit.inbox.unread():
@@ -168,7 +168,7 @@ def inform_subscriber(subscriber, submission):
     author = submission.author.name
     subreddit = submission.subreddit.display_name
     url = submission.permalink
-    reddit = get_an_instance()
+    reddit = get_a_praw_instance()
     reddit.redditor(subscriber).message(
         subject="Information",
         message=get_template("base.j2").render(

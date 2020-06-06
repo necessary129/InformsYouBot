@@ -14,7 +14,7 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with InformsYouBot.  If not, see <http://www.gnu.org/licenses/>.
-from .utils import get_an_instance, get_main_instance
+from .utils import get_a_praw_instance, get_main_praw_instance
 from prawcore.exceptions import ResponseException
 import datetime
 
@@ -29,7 +29,7 @@ def get_id_from_subs(subs):
 
 
 def get_submissions_newer_than(subreddits, sid, last_checked):
-    reddit = get_main_instance()
+    reddit = get_main_praw_instance()
     subreddits = "+".join(subreddits)
     submissions = []
     generator = reddit.subreddit(subreddits).new(limit=None)
@@ -47,7 +47,7 @@ def get_submissions_newer_than(subreddits, sid, last_checked):
 
 
 def user_exists(user):
-    reddit = get_an_instance()
+    reddit = get_a_praw_instance()
     try:
         reddit.redditor(user).id
         return True
@@ -56,7 +56,7 @@ def user_exists(user):
 
 
 def subreddit_exists(subreddit):
-    reddit = get_an_instance()
+    reddit = get_a_praw_instance()
     try:
         reddit.subreddit(subreddit).id
         return True

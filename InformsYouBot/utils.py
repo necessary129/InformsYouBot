@@ -100,12 +100,12 @@ def _load_instances():
     _create_instance_getter()
 
 
-def get_main_instance():
+def get_main_praw_instance():
     global MAIN_INSTANCE
     return MAIN_INSTANCE
 
 
-def get_an_instance():
+def get_a_praw_instance():
     global INSTANCE_CYCLE
     return next(INSTANCE_CYCLE)
 
