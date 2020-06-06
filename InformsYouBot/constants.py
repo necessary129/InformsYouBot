@@ -25,7 +25,7 @@ USERNAME = CONFIG["reddit_accounts"][0]["username"]
 OWNER_USERNAME = CONFIG["owner_account"].lower()
 
 UPDATE_MESSAGE = r"""/u/{author} has posted a submission to /r/{subreddit}.
-
+___
 [Check it out]({url})
 """
 
