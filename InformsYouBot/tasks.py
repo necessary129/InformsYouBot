@@ -36,7 +36,7 @@ from . import constants as c
 from .template import get_template
 
 
-from .commands import check_command
+from .commands import check_command, check_mention
 
 
 @app.on_after_finalize.connect
@@ -56,7 +56,7 @@ def get_new_messages():
     messages = []
     non_messages = []
     for item in reddit.inbox.unread():
-        if isinstance(item, Message):
+        if isinstance(item, Message) or item.type == "username_mention":
             messages.append(item)
         else:
             non_messages.append(item)
@@ -70,9 +70,13 @@ def get_new_messages():
 def process_message(message):
     if not message.author:
         return
+    if message.type == "username_mention":
+        if not message.submission:
+            return
+        check_mention(message)
+        return
     body = message.body.strip().lower()
     if not body.startswith(c.TRIGGER):
-        message.mark_read()
         return
     check_command(message)
 
