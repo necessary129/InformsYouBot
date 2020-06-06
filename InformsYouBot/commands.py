@@ -58,9 +58,9 @@ def check_mention(message):
     body = message.body.strip()
     args = body.split()
     username = args.pop(0).lower()
-    if c.USERNAME not in username:
+    if c.USERNAME.lower() not in username:
         return
-    command = args.pop(0).lower()[1:]
+    command = args.pop(0).lower()
     if command not in _MENTION_COMMANDS.keys():
         return
     func, rargs = _MENTION_COMMANDS[command]
@@ -210,4 +210,37 @@ def subscribe(message, auth, sub):
         get_template("base.j2").render(
             message=c.SUBSCRIPTION_SUCCESS.format(author=auth_s, subreddit=sub_s)
         )
+    )
+
+
+@mention_command("subscribe")
+def msubcribe(message):
+    author_s = message.submission.author.name.lower()
+    subreddit_s = message.submission.subreddit.display_name.lower()
+    subscriber_s = message.author.name.lower()
+    author = db.create_or_get(db.User, username=author_s)
+    subreddit = db.create_or_get(db.Subreddit, name=subreddit_s)
+    subscriber = db.create_or_get(db.User, username=subscriber_s)
+    subscription = db.Subscription(
+        author=author, subreddit=subreddit, subscriber=subscriber
+    )
+    try:
+        db.session.add(subscription)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        message.author.message(
+            subject="Re: subscribe",
+            message=get_template("base.j2").render(
+                message=_SUB_EXISTS_MSG.format(author=author_s, subreddit=subreddit_s)
+            ),
+        )
+        return
+    message.author.message(
+        subject="Re: subscribe",
+        message=get_template("base.j2").render(
+            message=c.SUBSCRIPTION_SUCCESS.format(
+                author=author_s, subreddit=subreddit_s
+            )
+        ),
     )
