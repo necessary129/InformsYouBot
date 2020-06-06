@@ -1,6 +1,7 @@
 {% block content %}
 {{ message }}
 {% endblock %}
+___
 {% block tables %}
 {% set pipe = joiner("|")%}
 {% if extra %}
@@ -14,6 +15,6 @@
 |{% for _ in li -%}
 -|
 {%- endfor %}
-
+___
 ^(Inspired by UpdateMeBot)
 {% endblock %}
