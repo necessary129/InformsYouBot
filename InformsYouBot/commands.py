@@ -25,6 +25,7 @@ from .utils import message_url
 from sqlalchemy.orm import joinedload
 
 _COMMANDS = {}
+_MENTION_COMMANDS = {}
 _INV_MSG = r"""Invalid arguments specified for {cmd}.
 
 Required arguments: {args}
@@ -43,6 +44,34 @@ def command(command, *fargs, owner_only=False):
         return func
 
     return wrapper
+
+
+def mention_command(command, *fargs):
+    def wrapper(func):
+        _MENTION_COMMANDS[command] = (func, fargs)
+        return func
+
+    return wrapper
+
+
+def check_mention(message):
+    body = message.body.strip()
+    args = body.split()
+    username = args.pop(0).lower()
+    if c.USERNAME not in username:
+        return
+    command = args.pop(0).lower()[1:]
+    if command not in _MENTION_COMMANDS.keys():
+        return
+    func, rargs = _MENTION_COMMANDS[command]
+    if len(args) != len(rargs):
+        message.reply(
+            get_template("base.j2").render(
+                message=_INV_MSG.format(cmd=command, args=", ".join(rargs))
+            )
+        )
+        return
+    func(message, *args)
 
 
 def check_command(message):
