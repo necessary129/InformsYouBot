@@ -113,7 +113,7 @@ def get_a_praw_instance():
 def message_url(recipient, subject, message):
     return "".join(
         (
-            "https://np.reddit.com/message/compose/?to=",
+            "https://reddit.com/message/compose/?to=",
             quote(recipient),
             "&subject=",
             quote(subject),
