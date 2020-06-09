@@ -56,10 +56,7 @@ def mention_command(command, *fargs):
 
 def check_mention(message):
     body = message.body.strip()
-    args = body.split()
-    username = args.pop(0).lower()
-    if c.USERNAME.lower() not in username:
-        return
+    args = body.split()[1:]
     command = args.pop(0).lower()
     if command not in _MENTION_COMMANDS.keys():
         return
