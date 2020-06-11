@@ -21,7 +21,7 @@ from celery import group
 from praw.models import Message
 from praw.exceptions import RedditAPIException
 from sqlalchemy.orm import contains_eager
-import datetime
+import time
 
 from .utils import (
     get_main_praw_instance,
@@ -90,10 +90,10 @@ def get_new_submissions():
     sid = db.session.query(db.KVStore).get("last_sid")
     if not sid:
         sid = db.KVStore(key="last_sid", value="")
-    ld = datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
-    lc = db.session.query(db.KVStore).get("last_checked_t")
-    if not lc:
-        lc = db.KVStore(
+    now = time.time()
+    last_checked_kv = db.session.query(db.KVStore).get("last_checked_t")
+    if not last_checked_kv:
+        last_checked_kv = db.KVStore(
             key="last_checked_t",
             value=str(
                 (
@@ -104,12 +104,10 @@ def get_new_submissions():
                 )
             ),
         )
-    last_checked = datetime.datetime.fromtimestamp(
-        float(lc.value), tz=datetime.timezone.utc
-    )
+    last_checked = float(last_checked_kv.value)
     new_subs = get_submissions_newer_than(subreddits, sid.value, last_checked)
-    lc.value = str(ld)
-    db.session.add(lc)
+    last_checked_kv.value = str(now)
+    db.session.add(last_checked_kv)
     db.session.commit()
     if not new_subs:
         return
