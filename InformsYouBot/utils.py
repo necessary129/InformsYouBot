@@ -33,7 +33,7 @@ from urllib.parse import quote
 REDIS_CLIENT = redis.Redis()
 
 
-def only_one(function=None, key=None, timeout=None, block=False):
+def only_one(function=None, key=None, timeout=600, block=False):
     """Enforce only one celery task at a time."""
 
     def _dec(run_func):
