@@ -15,13 +15,10 @@
 #    You should have received a copy of the GNU Lesser General Public License
 #    along with InformsYouBot.  If not, see <http://www.gnu.org/licenses/>.
 from .celery import app
-from celery import group
 
 # from celery.exceptions import Ignore
 from praw.models import Message
 from praw.exceptions import RedditAPIException
-from sqlalchemy.orm import contains_eager
-import time
 
 from .utils import (
     get_main_praw_instance,
@@ -87,34 +84,16 @@ def get_new_submissions():
     subreddits = [s[0] for s in db.session.query(db.Subreddit.name).all()]
     if not subreddits:
         return
-    sid = db.session.query(db.KVStore).get("last_sid")
+    sid = db.session.query(db.KVStore).get("last_sid_int")
     if not sid:
-        sid = db.KVStore(key="last_sid", value="")
-    now = time.time()
-    last_checked_kv = db.session.query(db.KVStore).get("last_checked_t")
-    if not last_checked_kv:
-        last_checked_kv = db.KVStore(
-            key="last_checked_t",
-            value=str(
-                (
-                    (
-                        datetime.datetime.now(tz=datetime.timezone.utc)
-                        - datetime.timedelta(days=9999)
-                    ).timestamp()
-                )
-            ),
-        )
-    last_checked = float(last_checked_kv.value)
-    new_subs = get_submissions_newer_than(subreddits, sid.value, last_checked)
-    last_checked_kv.value = str(now)
-    db.session.add(last_checked_kv)
-    db.session.commit()
+        sid = db.KVStore(key="last_sid_int", value="0")
+    new_subs = get_submissions_newer_than(subreddits, int(sid.value))
     if not new_subs:
         return
     new_sid = get_id_from_subs(new_subs)
     if not new_sid:
         return
-    sid.value = new_sid
+    sid.value = str(int(new_sid, base=36))
     db.session.add(sid)
     db.session.commit()
     for sub in new_subs:

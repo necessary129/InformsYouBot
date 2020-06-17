@@ -28,7 +28,7 @@ def get_id_from_subs(subs):
             pass
 
 
-def get_submissions_newer_than(subreddits, sid, last_checked):
+def get_submissions_newer_than(subreddits, sid):
     reddit = get_main_praw_instance()
     subreddits = "+".join(subreddits)
     submissions = []
@@ -36,10 +36,9 @@ def get_submissions_newer_than(subreddits, sid, last_checked):
     if not sid:
         submissions.append(next(generator))
         return submissions
+    lint = int
     for submission in generator:
-        if submission.id == sid:
-            break
-        elif (last_checked - submission.created_utc) > 20:
+        if lint(submission.id, base=36) <= sid:
             break
         submissions.append(submission)
     return submissions
